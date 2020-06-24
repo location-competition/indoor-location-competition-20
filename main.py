@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+from PIL import Image
 
 import numpy as np
 
@@ -8,7 +9,6 @@ from compute_f import compute_steps, compute_headings, compute_positions, \
     compute_step_heading, compute_stride_length, correct_positions
 from io_f import read_data_file
 from visualize_f import visualize_ground_truth, save_figure_to_html, save_path_image, gen_heatmap
-from PIL import Image
 
 path_data_folder = "./data/site1/floor1/path_data_files"
 floor_plan_filename = "./data/site1/floor1/floor_image.png"
@@ -18,12 +18,6 @@ path_image_save_folder = "./data/site1/floor1/path_images"
 magn_image_save_folder = "./data/site1/floor1/magn_images"
 wifi_image_save_folder = "./data/site1/floor1/wifi_images"
 ibeacon_image_save_folder = "./data/site1/floor1/ibeacon_images"
-
-
-# def ground_truth_visualization(path_filenames, image, width_meter, height_meter):
-#     for path_filename in path_filenames:
-#         path_id = path_filename.split('/')[-1].split('.')[0]
-#         save_path_image(path_filename, image, width_meter, height_meter, path_image_save_folder, title=path_id)
 
 
 def visualize_data_distribution(path_file_list, image, height_meter, width_meter):
@@ -59,7 +53,7 @@ def visualize_data_distribution(path_file_list, image, height_meter, width_meter
 
         for ibeacon_data in path_ibeacon_datas:
             ummid = ibeacon_data[1]
-            rssi = ibeacon_data[3]
+            rssi = ibeacon_data[2]
             dif = abs(gt_positions[:, 0] - float(ibeacon_data[0]))
             position_of_min = np.argmin(dif)
             posi = gt_positions[position_of_min, :3]
@@ -88,17 +82,6 @@ def visualize_data_distribution(path_file_list, image, height_meter, width_meter
 
 
 if __name__ == "__main__":
-    floor_plan = Image.open(floor_plan_filename)
-
-    with open(floor_info_filename) as f:
-        floor_info = json.load(f)
-    width_meter = floor_info["map_info"]["width"]
-    height_meter = floor_info["map_info"]["height"]
-
-    path_filenames = list(Path(path_data_folder).resolve().glob("*.txt"))
-    # path_filenames = [str(p_f) for p_f in path_filenames]
-    # ground_truth_visualization(path_filenames, floor_plan, width_meter, height_meter)
-
     if not Path(path_image_save_folder).is_dir():
         Path(path_image_save_folder).mkdir()
     if not Path(magn_image_save_folder).is_dir():
@@ -107,6 +90,15 @@ if __name__ == "__main__":
         Path(wifi_image_save_folder).mkdir()
     if not Path(ibeacon_image_save_folder).is_dir():
         Path(ibeacon_image_save_folder).mkdir()
+
+    floor_plan = Image.open(floor_plan_filename)
+
+    with open(floor_info_filename) as f:
+        floor_info = json.load(f)
+    width_meter = floor_info["map_info"]["width"]
+    height_meter = floor_info["map_info"]["height"]
+
+    path_filenames = list(Path(path_data_folder).resolve().glob("*.txt"))
 
     # visualize ground truth positions
     for path_filename in path_filenames:
@@ -117,5 +109,5 @@ if __name__ == "__main__":
         html_filename = str(Path(html_filename).resolve())
         save_figure_to_html(fig, html_filename)
 
-    # ground_truth_visualization(path_filenames, floor_plan, height_meter, width_meter)
+    # visualize magnetic, wifi, ibeacon
     visualize_data_distribution(path_filenames, floor_plan, height_meter, width_meter)
