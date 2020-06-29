@@ -1,14 +1,14 @@
 import json
 import os
 from pathlib import Path
-from PIL import Image
+
 
 import numpy as np
 
 from compute_f import compute_steps, compute_headings, compute_positions, \
     compute_step_heading, compute_stride_length, correct_positions
 from io_f import read_data_file
-from visualize_f import visualize_ground_truth, save_figure_to_html, save_path_image, gen_heatmap
+from visualize_f import visualize_trajectory, save_figure_to_html, gen_heatmap
 
 path_data_folder = "./data/site1/floor1/path_data_files"
 floor_plan_filename = "./data/site1/floor1/floor_image.png"
@@ -91,8 +91,6 @@ if __name__ == "__main__":
     if not Path(ibeacon_image_save_folder).is_dir():
         Path(ibeacon_image_save_folder).mkdir()
 
-    floor_plan = Image.open(floor_plan_filename)
-
     with open(floor_info_filename) as f:
         floor_info = json.load(f)
     width_meter = floor_info["map_info"]["width"]
@@ -104,10 +102,10 @@ if __name__ == "__main__":
     for path_filename in path_filenames:
         path_data = read_data_file(path_filename)
         path_id = path_filename.name.split(".")[0]
-        fig = visualize_ground_truth(path_data.waypoint[:, 1:3], floor_plan, width_meter, height_meter, title=path_id, show=False)
+        fig = visualize_trajectory(path_data.waypoint[:, 1:3], floor_plan_filename, width_meter, height_meter, title=path_id, show=False)
         html_filename = f'{path_image_save_folder}/{path_id}.html'
         html_filename = str(Path(html_filename).resolve())
         save_figure_to_html(fig, html_filename)
 
     # visualize magnetic, wifi, ibeacon
-    visualize_data_distribution(path_filenames, floor_plan, height_meter, width_meter)
+    visualize_data_distribution(path_filenames, floor_plan_filename, height_meter, width_meter)
