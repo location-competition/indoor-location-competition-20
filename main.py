@@ -182,9 +182,11 @@ if __name__ == "__main__":
         html_filename = str(Path(html_filename).resolve())
         save_figure_to_html(fig, html_filename)
 
-    # 2. visualize magnetic, wifi, ibeacon
+    # 2. visualize step position, magnetic, wifi, ibeacon
     mwi_datas = calibrate_magnetic_wifi_ibeacon_to_position(path_filenames)
-    fig = visualize_trajectory(np.array(list(mwi_datas.keys())), floor_plan_filename, width_meter, height_meter, mode='markers', title='Step Position', show=True)
+
+    step_positions = np.array(list(mwi_datas.keys()))
+    fig = visualize_trajectory(step_positions, floor_plan_filename, width_meter, height_meter, mode='markers', title='Step Position', show=True)
     html_filename = f'{step_position_image_save_folder}/step_position.html'
     html_filename = str(Path(html_filename).resolve())
     save_figure_to_html(fig, html_filename)
@@ -210,7 +212,7 @@ if __name__ == "__main__":
 
     ibeacon_rssi = extract_ibeacon_rssi(mwi_datas)
     print(f'This floor has {len(ibeacon_rssi.keys())} ibeacons')
-    target_ibeacon = input(f"Please input target ibeacon uuid_majorID_minorID:\nExample: {list(ibeacon_rssi.keys())[0:10]}")
+    target_ibeacon = input(f"Please input target ibeacon UUID_MajorID_MinorID:\nExample: {list(ibeacon_rssi.keys())[0:10]}")
     # target_ibeacon = 'FDA50693-A4E2-4FB1-AFCF-C6EB07647825_10073_61418'
     heat_positions = np.array(list(ibeacon_rssi[target_ibeacon].keys()))
     heat_values = np.array(list(ibeacon_rssi[target_ibeacon].values()))[:, 0]

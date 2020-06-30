@@ -1,12 +1,18 @@
 # 文件使用说明
 
 ## 功能运行脚本
-### man.py
+### main.py
 文件说明：首部路径参数配置可按需自行更改。
 
-功能1：生成并保存路径轨迹图片（全部轨迹）
+功能1：
+1. 提取本楼层所有采集数据文件的真值点，并可视化。
 
-功能2：从原始文件中提取各类数据并处理生成分布热力图（展示wifi、ibeacon的id列表，生成并保存选定的wifi、ibeacon的信号分布图以及楼层的磁力强度分布图）
+功能2：
+1. 根据PDR及真值点，计算出所有的步点位置，并将地磁、wifi、iBeacon数据配准到所有的步点位置上。
+2. 可视化本楼层所有的步点位置。
+3. 可视化本楼层地磁强度分布。
+4. 根据输入的wifi的bssid（命令行提示'Please input target wifi ap bssid:'），可视化该wifi ap的RSSI强度分布。
+5. 根据输入的iBeacon的UUID_MajorID_MinorID（命令行提示'Please input target ibeacon UUID_MajorID_MinorID:'），可视化该iBeacon的RSSI强度分布。
 
 ## 功能模块文件
 ### compute_f.py
