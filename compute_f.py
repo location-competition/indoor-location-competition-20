@@ -2,14 +2,20 @@ import numpy as np
 import scipy.signal as signal
 
 
-def split_ts_seq(ts_seq, sep_ts, empty_padding=False):
+def split_ts_seq(ts_seq, sep_ts):
+    """
+
+    :param ts_seq:
+    :param sep_ts:
+    :return:
+    """
     tss = ts_seq[:, 0].astype(int)
     unique_sep_ts = np.unique(sep_ts)
     ts_seqs = []
     start_index = 0
     for i in range(0, unique_sep_ts.shape[0]):
         end_index = np.searchsorted(tss, unique_sep_ts[i], side='right')
-        if not empty_padding and start_index == end_index:
+        if start_index == end_index:
             continue
         ts_seqs.append(ts_seq[start_index:end_index, :].copy())
         start_index = end_index
@@ -17,55 +23,82 @@ def split_ts_seq(ts_seq, sep_ts, empty_padding=False):
     # tail data
     if start_index < ts_seq.shape[0]:
         ts_seqs.append(ts_seq[start_index:, :].copy())
-    # mock tail data to align the length of sep_ts plus one
-    elif empty_padding:
-        ts_seqs.append(ts_seq[0:0, :].copy())
 
     return ts_seqs
 
 
 def correct_trajectory(original_xys, end_xy):
+    """
+
+    :param original_xys: numpy ndarray, shape(N, 2)
+    :param end_xy: numpy ndarray, shape(1, 2)
+    :return:
+    """
     corrected_xys = np.zeros((0, 2))
+
     A = original_xys[0, :]
     B = end_xy
     Bp = original_xys[-1, :]
+
     angle_BAX = np.arctan2(B[1] - A[1], B[0] - A[0])
     angle_BpAX = np.arctan2(Bp[1] - A[1], Bp[0] - A[0])
     angle_BpAB = angle_BpAX - angle_BAX
     AB = np.sqrt(np.sum((B - A) ** 2))
     ABp = np.sqrt(np.sum((Bp - A) ** 2))
+
     corrected_xys = np.append(corrected_xys, [A], 0)
     for i in np.arange(1, np.size(original_xys, 0)):
         angle_CpAX = np.arctan2(original_xys[i, 1] - A[1], original_xys[i, 0] - A[0])
+
         angle_CAX = angle_CpAX - angle_BpAB
+
         ACp = np.sqrt(np.sum((original_xys[i, :] - A) ** 2))
+
         AC = ACp * AB / ABp
+
         delta_C = np.array([AC * np.cos(angle_CAX), AC * np.sin(angle_CAX)])
+
         C = delta_C + A
+
         corrected_xys = np.append(corrected_xys, [C], 0)
+
     return corrected_xys
 
 
-def correct_positions(target_positions, reference_positions):
-    posi_lists = split_ts_seq(target_positions, reference_positions[:, 0])
-    for i, _ in enumerate(posi_lists):
-        if posi_lists[i].size == 0:
-            continue
-        if i > 0 and posi_lists[i - 1].size > 0:
-            delta_x = posi_lists[i - 1][-1, 1] - posi_lists[i][0, 1]
-            delta_y = posi_lists[i - 1][-1, 2] - posi_lists[i][0, 2]
-            posi_lists[i][:, 1] += delta_x
-            posi_lists[i][:, 2] += delta_y
-            if len(posi_lists[i]) > 1:
-                posi_lists[i][0, 1:3] = (posi_lists[i][0, 1:3] + posi_lists[i][1, 1:3]) / 2
-        if i >= len(reference_positions):
-            continue
-        posi_lists[i][:, 1:3] = correct_trajectory(posi_lists[i][:, 1:3], reference_positions[i, 1:3])
-    organized_lists = []
-    for i, _ in enumerate(posi_lists):
-        organized_lists += posi_lists[i].tolist()
-    organized_lists = np.array(organized_lists)
-    return organized_lists
+def correct_positions(rel_positions, reference_positions):
+    """
+
+    :param rel_positions:
+    :param reference_positions:
+    :return:
+    """
+    rel_positions_list = split_ts_seq(rel_positions, reference_positions[:, 0])
+    if len(rel_positions_list) != reference_positions.shape[0] - 1:
+        print(f'Rel positions list size: {len(rel_positions_list)}, ref positions size: {reference_positions.shape[0]}')
+        del rel_positions_list[-1]
+    assert len(rel_positions_list) == reference_positions.shape[0] - 1
+
+    corrected_positions = np.zeros((0, 3))
+    for i, rel_ps in enumerate(rel_positions_list):
+        start_position = reference_positions[i]
+        end_position = reference_positions[i + 1]
+        abs_ps = np.zeros(rel_ps.shape)
+        abs_ps[:, 0] = rel_ps[:, 0]
+        # abs_ps[:, 1:3] = rel_ps[:, 1:3] + start_position[1:3]
+        abs_ps[0, 1:3] = rel_ps[0, 1:3] + start_position[1:3]
+        for j in range(1, rel_ps.shape[0]):
+            abs_ps[j, 1:3] = abs_ps[j-1, 1:3] + rel_ps[j, 1:3]
+        abs_ps = np.insert(abs_ps, 0, start_position, axis=0)
+        corrected_xys = correct_trajectory(abs_ps[:, 1:3], end_position[1:3])
+        corrected_ps = np.column_stack((abs_ps[:, 0], corrected_xys))
+        if i == 0:
+            corrected_positions = np.append(corrected_positions, corrected_ps, axis=0)
+        else:
+            corrected_positions = np.append(corrected_positions, corrected_ps[1:], axis=0)
+
+    corrected_positions = np.array(corrected_positions)
+
+    return corrected_positions
 
 
 def init_parameters_filter(sample_freq, warmup_data, cut_off_freq=2):
@@ -307,19 +340,22 @@ def compute_step_heading(step_timestamps, headings):
     return step_headings
 
 
-def compute_positions(init_xy, stride_lengths, step_headings):
-    cur_position = [0., init_xy[0], init_xy[1], 0.]
-    cur_heading = [0., 0.]
+def compute_rel_positions(stride_lengths, step_headings):
+    rel_positions = np.zeros((stride_lengths.shape[0], 3))
+    for i in range(0, stride_lengths.shape[0]):
+        rel_positions[i, 0] = stride_lengths[i, 0]
+        rel_positions[i, 1] = -stride_lengths[i, 1] * np.sin(step_headings[i, 1])
+        rel_positions[i, 2] = stride_lengths[i, 1] * np.cos(step_headings[i, 1])
 
-    fusion_positions = np.zeros((np.size(stride_lengths, 0), 4))
-    fusion_headings = np.zeros((np.size(stride_lengths, 0), 2))
+    return rel_positions
 
-    for i in np.arange(0, np.size(stride_lengths, 0)):
-        cur_position[0] = stride_lengths[i, 0]
-        cur_position[1] = cur_position[1] - stride_lengths[i, 1] * np.sin(step_headings[i, 1])
-        cur_position[2] = cur_position[2] + stride_lengths[i, 1] * np.cos(step_headings[i, 1])
-        cur_heading[:] = stride_lengths[i, 0], step_headings[i, 1]
-        fusion_positions[i, :] = cur_position
-        fusion_headings[i, :] = cur_heading
 
-    return fusion_positions, fusion_headings
+def compute_step_positions(acce_datas, ahrs_datas, posi_datas):
+    step_timestamps, step_indexs, step_acce_max_mins = compute_steps(acce_datas)
+    headings = compute_headings(ahrs_datas)
+    stride_lengths = compute_stride_length(step_acce_max_mins)
+    step_headings = compute_step_heading(step_timestamps, headings)
+    rel_positions = compute_rel_positions(stride_lengths, step_headings)
+    step_positions = correct_positions(rel_positions, posi_datas)
+
+    return step_positions
