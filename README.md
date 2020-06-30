@@ -13,6 +13,7 @@
 3. 可视化本楼层地磁强度分布。
 4. 根据输入的wifi的bssid（命令行提示'Please input target wifi ap bssid:'），可视化该wifi ap的RSSI强度分布。
 5. 根据输入的iBeacon的UUID_MajorID_MinorID（命令行提示'Please input target ibeacon UUID_MajorID_MinorID:'），可视化该iBeacon的RSSI强度分布。
+6. 可视化本楼层不同地点扫到wifi个数的分布情况。
 
 ## 功能模块文件
 ### compute_f.py

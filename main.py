@@ -91,7 +91,7 @@ def calibrate_magnetic_wifi_ibeacon_to_position(path_file_list):
 def extract_magnetic_strength(mwi_datas):
     magnetic_strength = {}
     for position_key in mwi_datas:
-        print(f'Position: {position_key}')
+        # print(f'Position: {position_key}')
 
         magnetic_data = mwi_datas[position_key]['magnetic']
         magnetic_s = np.mean(np.sqrt(np.sum(magnetic_data[:, 1:4] ** 2, axis=1)))
@@ -103,7 +103,7 @@ def extract_magnetic_strength(mwi_datas):
 def extract_wifi_rssi(mwi_datas):
     wifi_rssi = {}
     for position_key in mwi_datas:
-        print(f'Position: {position_key}')
+        # print(f'Position: {position_key}')
 
         wifi_data = mwi_datas[position_key]['wifi']
         for wifi_d in wifi_data:
@@ -131,7 +131,7 @@ def extract_wifi_rssi(mwi_datas):
 def extract_ibeacon_rssi(mwi_datas):
     ibeacon_rssi = {}
     for position_key in mwi_datas:
-        print(f'Position: {position_key}')
+        # print(f'Position: {position_key}')
 
         ibeacon_data = mwi_datas[position_key]['ibeacon']
         for ibeacon_d in ibeacon_data:
@@ -154,6 +154,18 @@ def extract_ibeacon_rssi(mwi_datas):
             ibeacon_rssi[ummid] = position_rssi
 
     return ibeacon_rssi
+
+
+def extract_wifi_count(mwi_datas):
+    wifi_counts = {}
+    for position_key in mwi_datas:
+        # print(f'Position: {position_key}')
+
+        wifi_data = mwi_datas[position_key]['wifi']
+        count = np.unique(wifi_data[:, 2]).shape[0]
+        wifi_counts[position_key] = count
+
+    return wifi_counts
 
 
 if __name__ == "__main__":
@@ -194,7 +206,7 @@ if __name__ == "__main__":
     magnetic_strength = extract_magnetic_strength(mwi_datas)
     heat_positions = np.array(list(magnetic_strength.keys()))
     heat_values = np.array(list(magnetic_strength.values()))
-    fig = visualize_heatmap(heat_positions, heat_values, floor_plan_filename, width_meter, height_meter, title='Magnetic Strength', show=True)
+    fig = visualize_heatmap(heat_positions, heat_values, floor_plan_filename, width_meter, height_meter, colorbar_title='mu tesla', title='Magnetic Strength', show=True)
     html_filename = f'{magn_image_save_folder}/magnetic_strength.html'
     html_filename = str(Path(html_filename).resolve())
     save_figure_to_html(fig, html_filename)
@@ -205,7 +217,7 @@ if __name__ == "__main__":
     # target_wifi = '1e:74:9c:a7:b2:e4'
     heat_positions = np.array(list(wifi_rssi[target_wifi].keys()))
     heat_values = np.array(list(wifi_rssi[target_wifi].values()))[:, 0]
-    fig = visualize_heatmap(heat_positions, heat_values, floor_plan_filename, width_meter, height_meter, title=target_wifi, show=True)
+    fig = visualize_heatmap(heat_positions, heat_values, floor_plan_filename, width_meter, height_meter, colorbar_title='dBm', title=f'Wifi: {target_wifi} RSSI', show=True)
     html_filename = f'{wifi_image_save_folder}/{target_wifi}.html'
     html_filename = str(Path(html_filename).resolve())
     save_figure_to_html(fig, html_filename)
@@ -216,8 +228,20 @@ if __name__ == "__main__":
     # target_ibeacon = 'FDA50693-A4E2-4FB1-AFCF-C6EB07647825_10073_61418'
     heat_positions = np.array(list(ibeacon_rssi[target_ibeacon].keys()))
     heat_values = np.array(list(ibeacon_rssi[target_ibeacon].values()))[:, 0]
-    fig = visualize_heatmap(heat_positions, heat_values, floor_plan_filename, width_meter, height_meter, title=target_ibeacon, show=True)
+    fig = visualize_heatmap(heat_positions, heat_values, floor_plan_filename, width_meter, height_meter, colorbar_title='dBm', title=f'iBeacon: {target_ibeacon} RSSI', show=True)
     html_filename = f'{ibeacon_image_save_folder}/{target_ibeacon}.html'
+    html_filename = str(Path(html_filename).resolve())
+    save_figure_to_html(fig, html_filename)
+
+    wifi_counts = extract_wifi_count(mwi_datas)
+    heat_positions = np.array(list(wifi_counts.keys()))
+    heat_values = np.array(list(wifi_counts.values()))
+    # filter out positions that no wifi detected
+    mask = heat_values != 0
+    heat_positions = heat_positions[mask]
+    heat_values = heat_values[mask]
+    fig = visualize_heatmap(heat_positions, heat_values, floor_plan_filename, width_meter, height_meter, colorbar_title='number', title=f'Wifi Count', show=True)
+    html_filename = f'{ibeacon_image_save_folder}/wifi_count.html'
     html_filename = str(Path(html_filename).resolve())
     save_figure_to_html(fig, html_filename)
 

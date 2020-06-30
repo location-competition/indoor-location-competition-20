@@ -79,7 +79,7 @@ def visualize_trajectory(trajectory, floor_plan_filename, width_meter, height_me
     return fig
 
 
-def visualize_heatmap(position, value, floor_plan_filename, width_meter, height_meter, colorbar_name="colorbar", title=None, show=False):
+def visualize_heatmap(position, value, floor_plan_filename, width_meter, height_meter, colorbar_title="colorbar", title=None, show=False):
     fig = go.Figure()
 
     # add heat map
@@ -89,7 +89,7 @@ def visualize_heatmap(position, value, floor_plan_filename, width_meter, height_
                    mode='markers',
                    marker=dict(size=7,
                                color=value,
-                               colorbar=dict(title=colorbar_name),
+                               colorbar=dict(title=colorbar_title),
                                colorscale="Rainbow"),
                    text=value,
                    name=title))
