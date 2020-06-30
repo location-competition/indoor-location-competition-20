@@ -6,7 +6,7 @@ def save_figure_to_html(fig, filename):
     fig.write_html(filename)
 
 
-def visualize_trajectory(trajectory, floor_plan_filename, width_meter, height_meter, title=None, show=False):
+def visualize_trajectory(trajectory, floor_plan_filename, width_meter, height_meter, title=None, mode='lines + markers + text', show=False):
     fig = go.Figure()
 
     # add trajectory
@@ -33,7 +33,7 @@ def visualize_trajectory(trajectory, floor_plan_filename, width_meter, height_me
         go.Scattergl(
             x=trajectory[:, 0],
             y=trajectory[:, 1],
-            mode='markers + lines + text',
+            mode=mode,
             marker=dict(size=size_list, color=color_list),
             line=dict(shape='linear', color='rgb(100, 10, 100)', width=2, dash='dot'),
             text=text_list,
@@ -79,7 +79,7 @@ def visualize_trajectory(trajectory, floor_plan_filename, width_meter, height_me
     return fig
 
 
-def visualize_heatmap(position, value, floor_plan_filename, width_meter, height_meter, colorbar_name="colorbar", title=None, show=True):
+def visualize_heatmap(position, value, floor_plan_filename, width_meter, height_meter, colorbar_name="colorbar", title=None, show=False):
     fig = go.Figure()
 
     # add heat map

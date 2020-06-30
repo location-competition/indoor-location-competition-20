@@ -14,7 +14,8 @@ floor_plan_filename = "./data/site1/floor1/floor_image.png"
 floor_info_filename = "./data/site1/floor1/floor_info.json"
 
 path_image_save_folder = "./data/site1/floor1/path_images"
-magn_image_save_folder = "./data/site1/floor1/magn_images"
+step_position_image_save_folder = "./data/site1/floor1/"
+magn_image_save_folder = "./data/site1/floor1/"
 wifi_image_save_folder = "./data/site1/floor1/wifi_images"
 ibeacon_image_save_folder = "./data/site1/floor1/ibeacon_images"
 
@@ -31,17 +32,17 @@ def calibrate_magnetic_wifi_ibeacon_to_position(path_file_list):
         ibeacon_datas = path_datas.ibeacon
         posi_datas = path_datas.waypoint
 
-        step_gt_positions = compute_step_positions(acce_datas, ahrs_datas, posi_datas)
+        step_positions = compute_step_positions(acce_datas, ahrs_datas, posi_datas)
         # visualize_trajectory(posi_datas[:, 1:3], floor_plan_filename, width_meter, height_meter, title='Ground Truth', show=True)
-        # visualize_trajectory(step_gt_positions[:, 1:3], floor_plan_filename, width_meter, height_meter, title='Step Ground Truth', show=True)
+        # visualize_trajectory(step_positions[:, 1:3], floor_plan_filename, width_meter, height_meter, title='Step Position', show=True)
 
         if wifi_datas.size != 0:
             sep_tss = np.unique(wifi_datas[:, 0].astype(int))
             wifi_datas_list = split_ts_seq(wifi_datas, sep_tss)
             for wifi_ds in wifi_datas_list:
-                diff = np.abs(step_gt_positions[:, 0] - float(wifi_ds[0, 0]))
+                diff = np.abs(step_positions[:, 0] - float(wifi_ds[0, 0]))
                 index = np.argmin(diff)
-                target_xy_key = tuple(step_gt_positions[index, 1:3])
+                target_xy_key = tuple(step_positions[index, 1:3])
                 if target_xy_key in mwi_datas:
                     mwi_datas[target_xy_key]['wifi'] = np.append(mwi_datas[target_xy_key]['wifi'], wifi_ds, axis=0)
                 else:
@@ -55,9 +56,9 @@ def calibrate_magnetic_wifi_ibeacon_to_position(path_file_list):
             sep_tss = np.unique(ibeacon_datas[:, 0].astype(int))
             ibeacon_datas_list = split_ts_seq(ibeacon_datas, sep_tss)
             for ibeacon_ds in ibeacon_datas_list:
-                diff = np.abs(step_gt_positions[:, 0] - float(ibeacon_ds[0, 0]))
+                diff = np.abs(step_positions[:, 0] - float(ibeacon_ds[0, 0]))
                 index = np.argmin(diff)
-                target_xy_key = tuple(step_gt_positions[index, 1:3])
+                target_xy_key = tuple(step_positions[index, 1:3])
                 if target_xy_key in mwi_datas:
                     mwi_datas[target_xy_key]['ibeacon'] = np.append(mwi_datas[target_xy_key]['ibeacon'], ibeacon_ds, axis=0)
                 else:
@@ -70,9 +71,9 @@ def calibrate_magnetic_wifi_ibeacon_to_position(path_file_list):
         sep_tss = np.unique(magn_datas[:, 0].astype(int))
         magn_datas_list = split_ts_seq(magn_datas, sep_tss)
         for magn_ds in magn_datas_list:
-            diff = np.abs(step_gt_positions[:, 0] - float(magn_ds[0, 0]))
+            diff = np.abs(step_positions[:, 0] - float(magn_ds[0, 0]))
             index = np.argmin(diff)
-            target_xy_key = tuple(step_gt_positions[index, 1:3])
+            target_xy_key = tuple(step_positions[index, 1:3])
             if target_xy_key in mwi_datas:
                 mwi_datas[target_xy_key]['magnetic'] = np.append(mwi_datas[target_xy_key]['magnetic'], magn_ds, axis=0)
             else:
@@ -85,6 +86,18 @@ def calibrate_magnetic_wifi_ibeacon_to_position(path_file_list):
         print('fff')
 
     return mwi_datas
+
+
+def extract_magnetic_strength(mwi_datas):
+    magnetic_strength = {}
+    for position_key in mwi_datas:
+        print(f'Position: {position_key}')
+
+        magnetic_data = mwi_datas[position_key]['magnetic']
+        magnetic_s = np.mean(np.sqrt(np.sum(magnetic_data[:, 1:4] ** 2, axis=1)))
+        magnetic_strength[position_key] = magnetic_s
+
+    return magnetic_strength
 
 
 def extract_wifi_rssi(mwi_datas):
@@ -160,29 +173,50 @@ if __name__ == "__main__":
 
     path_filenames = list(Path(path_data_folder).resolve().glob("*.txt"))
 
-    # visualize ground truth positions
-    # for path_filename in path_filenames:
-    #     path_data = read_data_file(path_filename)
-    #     path_id = path_filename.name.split(".")[0]
-    #     fig = visualize_trajectory(path_data.waypoint[:, 1:3], floor_plan_filename, width_meter, height_meter, title=path_id, show=False)
-    #     html_filename = f'{path_image_save_folder}/{path_id}.html'
-    #     html_filename = str(Path(html_filename).resolve())
-    #     save_figure_to_html(fig, html_filename)
+    # 1. visualize ground truth positions
+    for path_filename in path_filenames:
+        path_data = read_data_file(path_filename)
+        path_id = path_filename.name.split(".")[0]
+        fig = visualize_trajectory(path_data.waypoint[:, 1:3], floor_plan_filename, width_meter, height_meter, title=path_id, show=False)
+        html_filename = f'{path_image_save_folder}/{path_id}.html'
+        html_filename = str(Path(html_filename).resolve())
+        save_figure_to_html(fig, html_filename)
 
-    # visualize magnetic, wifi, ibeacon
+    # 2. visualize magnetic, wifi, ibeacon
     mwi_datas = calibrate_magnetic_wifi_ibeacon_to_position(path_filenames)
+    fig = visualize_trajectory(np.array(list(mwi_datas.keys())), floor_plan_filename, width_meter, height_meter, mode='markers', title='Step Position', show=True)
+    html_filename = f'{step_position_image_save_folder}/step_position.html'
+    html_filename = str(Path(html_filename).resolve())
+    save_figure_to_html(fig, html_filename)
 
-    # visualize_trajectory(np.array(list(mwi_datas.keys())), floor_plan_filename, width_meter, height_meter, title='Step Ground Truth', show=True)
+    magnetic_strength = extract_magnetic_strength(mwi_datas)
+    heat_positions = np.array(list(magnetic_strength.keys()))
+    heat_values = np.array(list(magnetic_strength.values()))
+    fig = visualize_heatmap(heat_positions, heat_values, floor_plan_filename, width_meter, height_meter, title='Magnetic Strength', show=True)
+    html_filename = f'{magn_image_save_folder}/magnetic_strength.html'
+    html_filename = str(Path(html_filename).resolve())
+    save_figure_to_html(fig, html_filename)
 
     wifi_rssi = extract_wifi_rssi(mwi_datas)
-
-    # print all wifi bssid
     print(f'This floor has {len(wifi_rssi.keys())} wifi aps')
-    # target_wifi_ap = input(f"Please input target wifi ap bssid:\nExample: {list(wifi_rssi.keys())[0:10]}")
-    position_rssi = wifi_rssi['1e:74:9c:a7:b2:e4']
-    heat_positions = np.array(list(wifi_rssi['1e:74:9c:a7:b2:e4'].keys()))
-    heat_values = np.array(list(wifi_rssi['1e:74:9c:a7:b2:e4'].values()))[:, 0]
-    visualize_heatmap(heat_positions, heat_values, floor_plan_filename, width_meter, height_meter)
-    # ibeacon_rssi = extract_ibeacon_rssi(mwi_datas)
+    target_wifi = input(f"Please input target wifi ap bssid:\nExample: {list(wifi_rssi.keys())[0:10]}")
+    # target_wifi = '1e:74:9c:a7:b2:e4'
+    heat_positions = np.array(list(wifi_rssi[target_wifi].keys()))
+    heat_values = np.array(list(wifi_rssi[target_wifi].values()))[:, 0]
+    fig = visualize_heatmap(heat_positions, heat_values, floor_plan_filename, width_meter, height_meter, title=target_wifi, show=True)
+    html_filename = f'{wifi_image_save_folder}/{target_wifi}.html'
+    html_filename = str(Path(html_filename).resolve())
+    save_figure_to_html(fig, html_filename)
+
+    ibeacon_rssi = extract_ibeacon_rssi(mwi_datas)
+    print(f'This floor has {len(ibeacon_rssi.keys())} ibeacons')
+    target_ibeacon = input(f"Please input target ibeacon uuid_majorID_minorID:\nExample: {list(ibeacon_rssi.keys())[0:10]}")
+    # target_ibeacon = 'FDA50693-A4E2-4FB1-AFCF-C6EB07647825_10073_61418'
+    heat_positions = np.array(list(ibeacon_rssi[target_ibeacon].keys()))
+    heat_values = np.array(list(ibeacon_rssi[target_ibeacon].values()))[:, 0]
+    fig = visualize_heatmap(heat_positions, heat_values, floor_plan_filename, width_meter, height_meter, title=target_ibeacon, show=True)
+    html_filename = f'{ibeacon_image_save_folder}/{target_ibeacon}.html'
+    html_filename = str(Path(html_filename).resolve())
+    save_figure_to_html(fig, html_filename)
 
     print('fff')
