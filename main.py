@@ -13,11 +13,11 @@ path_data_folder = "./data/site1/floor1/path_data_files"
 floor_plan_filename = "./data/site1/floor1/floor_image.png"
 floor_info_filename = "./data/site1/floor1/floor_info.json"
 
-path_image_save_folder = "./data/site1/floor1/path_images"
-step_position_image_save_folder = "./data/site1/floor1/"
-magn_image_save_folder = "./data/site1/floor1/"
-wifi_image_save_folder = "./data/site1/floor1/wifi_images"
-ibeacon_image_save_folder = "./data/site1/floor1/ibeacon_images"
+path_image_save_folder = "./output/site1/floor1/path_images"
+step_position_image_save_folder = "./output/site1/floor1/"
+magn_image_save_folder = "./output/site1/floor1/"
+wifi_image_save_folder = "./output/site1/floor1/wifi_images"
+ibeacon_image_save_folder = "./output/site1/floor1/ibeacon_images"
 
 
 def calibrate_magnetic_wifi_ibeacon_to_position(path_file_list):
@@ -168,14 +168,10 @@ def extract_wifi_count(mwi_datas):
 
 
 if __name__ == "__main__":
-    if not Path(path_image_save_folder).is_dir():
-        Path(path_image_save_folder).mkdir()
-    if not Path(magn_image_save_folder).is_dir():
-        Path(magn_image_save_folder).mkdir()
-    if not Path(wifi_image_save_folder).is_dir():
-        Path(wifi_image_save_folder).mkdir()
-    if not Path(ibeacon_image_save_folder).is_dir():
-        Path(ibeacon_image_save_folder).mkdir()
+    Path(path_image_save_folder).mkdir(parents=True, exist_ok=True)
+    Path(magn_image_save_folder).mkdir(parents=True, exist_ok=True)
+    Path(wifi_image_save_folder).mkdir(parents=True, exist_ok=True)
+    Path(ibeacon_image_save_folder).mkdir(parents=True, exist_ok=True)
 
     with open(floor_info_filename) as f:
         floor_info = json.load(f)
@@ -188,7 +184,7 @@ if __name__ == "__main__":
     print('Visualizing ground truth positions...')
     for path_filename in path_filenames:
         print(f'Processing file: {path_filename}...')
-        
+
         path_data = read_data_file(path_filename)
         path_id = path_filename.name.split(".")[0]
         fig = visualize_trajectory(path_data.waypoint[:, 1:3], floor_plan_filename, width_meter, height_meter, title=path_id, show=False)
