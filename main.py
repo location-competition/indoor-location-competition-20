@@ -38,7 +38,7 @@ def calibrate_magnetic_wifi_ibeacon_to_position(path_file_list):
         # visualize_trajectory(step_positions[:, 1:3], floor_plan_filename, width_meter, height_meter, title='Step Position', show=True)
 
         if wifi_datas.size != 0:
-            sep_tss = np.unique(wifi_datas[:, 0].astype(int))
+            sep_tss = np.unique(wifi_datas[:, 0].astype(float))
             wifi_datas_list = split_ts_seq(wifi_datas, sep_tss)
             for wifi_ds in wifi_datas_list:
                 diff = np.abs(step_positions[:, 0] - float(wifi_ds[0, 0]))
@@ -54,7 +54,7 @@ def calibrate_magnetic_wifi_ibeacon_to_position(path_file_list):
                     }
 
         if ibeacon_datas.size != 0:
-            sep_tss = np.unique(ibeacon_datas[:, 0].astype(int))
+            sep_tss = np.unique(ibeacon_datas[:, 0].astype(float))
             ibeacon_datas_list = split_ts_seq(ibeacon_datas, sep_tss)
             for ibeacon_ds in ibeacon_datas_list:
                 diff = np.abs(step_positions[:, 0] - float(ibeacon_ds[0, 0]))
@@ -69,7 +69,7 @@ def calibrate_magnetic_wifi_ibeacon_to_position(path_file_list):
                         'ibeacon': ibeacon_ds
                     }
 
-        sep_tss = np.unique(magn_datas[:, 0].astype(int))
+        sep_tss = np.unique(magn_datas[:, 0].astype(float))
         magn_datas_list = split_ts_seq(magn_datas, sep_tss)
         for magn_ds in magn_datas_list:
             diff = np.abs(step_positions[:, 0] - float(magn_ds[0, 0]))

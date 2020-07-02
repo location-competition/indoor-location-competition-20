@@ -9,7 +9,7 @@ def split_ts_seq(ts_seq, sep_ts):
     :param sep_ts:
     :return:
     """
-    tss = ts_seq[:, 0].astype(int)
+    tss = ts_seq[:, 0].astype(float)
     unique_sep_ts = np.unique(sep_ts)
     ts_seqs = []
     start_index = 0
