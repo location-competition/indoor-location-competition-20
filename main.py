@@ -24,6 +24,7 @@ def calibrate_magnetic_wifi_ibeacon_to_position(path_file_list):
     mwi_datas = {}
     for path_filename in path_file_list:
         print(f'Processing {path_filename}...')
+
         path_datas = read_data_file(path_filename)
         acce_datas = path_datas.acce
         magn_datas = path_datas.magn
@@ -82,8 +83,6 @@ def calibrate_magnetic_wifi_ibeacon_to_position(path_file_list):
                     'wifi': np.zeros((0, 5)),
                     'ibeacon': np.zeros((0, 3))
                 }
-
-        print('fff')
 
     return mwi_datas
 
@@ -186,7 +185,10 @@ if __name__ == "__main__":
     path_filenames = list(Path(path_data_folder).resolve().glob("*.txt"))
 
     # 1. visualize ground truth positions
+    print('Visualizing ground truth positions...')
     for path_filename in path_filenames:
+        print(f'Processing file: {path_filename}...')
+        
         path_data = read_data_file(path_filename)
         path_id = path_filename.name.split(".")[0]
         fig = visualize_trajectory(path_data.waypoint[:, 1:3], floor_plan_filename, width_meter, height_meter, title=path_id, show=False)
