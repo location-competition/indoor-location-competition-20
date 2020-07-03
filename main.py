@@ -20,6 +20,7 @@ step_position_image_save_dir = save_dir
 magn_image_save_dir = save_dir
 wifi_image_save_dir = save_dir + '/wifi_images'
 ibeacon_image_save_dir = save_dir + '/ibeacon_images'
+wifi_count_image_save_dir = save_dir
 
 
 def calibrate_magnetic_wifi_ibeacon_to_position(path_file_list):
@@ -250,7 +251,7 @@ if __name__ == "__main__":
     heat_positions = heat_positions[mask]
     heat_values = heat_values[mask]
     fig = visualize_heatmap(heat_positions, heat_values, floor_plan_filename, width_meter, height_meter, colorbar_title='number', title=f'Wifi Count', show=True)
-    html_filename = f'{ibeacon_image_save_dir}/wifi_count.html'
+    html_filename = f'{wifi_count_image_save_dir}/wifi_count.html'
     html_filename = str(Path(html_filename).resolve())
     save_figure_to_html(fig, html_filename)
 

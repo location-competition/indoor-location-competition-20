@@ -1,13 +1,15 @@
 # 文件使用说明
 
-## 功能运行脚本
+## 运行脚本
+
 ### main.py
-文件说明：首部路径参数配置可按需自行更改。
 
 功能1：
+
 1. 提取本楼层所有采集数据文件的真值点，并可视化。
 
 功能2：
+
 1. 根据PDR及真值点，计算出所有的步点位置，并将地磁、wifi、iBeacon数据配准到所有的步点位置上。
 2. 可视化本楼层所有的步点位置。
 3. 可视化本楼层地磁强度分布。
@@ -15,16 +17,17 @@
 5. 根据输入的iBeacon的UUID_MajorID_MinorID（命令行提示'Please input target ibeacon UUID_MajorID_MinorID:'），可视化该iBeacon的RSSI强度分布。
 6. 可视化本楼层不同地点扫到wifi个数的分布情况。
 
-## 功能模块文件
-### compute_f.py
-文件说明：包含数据计算、处理的相关函数
-### io_f.py
-文件说明：包含文件读取、数据整理的相关函数
-### visualize_f.py
-文件说明：包含数据可视化的相关函数
+## 其他文件
+
+### compute_f.py：包含数据计算、处理的相关函数
+
+### io_f.py：包含文件读取、数据整理的相关函数
+
+### visualize_f.py：包含数据可视化的相关函数
 
 ## data文件夹
-文件说明：包含原始数据并作为默认的数据存储位置
+
+包含原始数据并作为默认的数据存储位置
 
 示例：
 
@@ -40,13 +43,19 @@ data/site1/F1/floor_info.json 为包含F1地图尺寸信息的文件
 
 data/site1/F1/geojson_map.json 为F1的地图的geojson文件
 
-data/site1/F1/path_images 为生成的F1的所有path真值轨迹图的存储位置
+可视化结果保存在output目录下：
 
-data/site1/F1/magn_images 为生成的F1的地磁信号强度分布图的存储位置、
+output/site1/F1/path_images 为生成的F1的所有path真值轨迹图目录
 
-data/site1/F1/wifi_images 为生成的F1的所有Wi-Fi AP信号强度分布图的存储位置
+output/site1/F1/step_position.html 为生成的F1的所有步行位置分布图
 
-data/site1/F1/ibeacon_images 为生成的F1的所有iBeacon信号强度分布图的存储位置
+output/site1/F1/magnetic_strength.html 为生成的F1的地磁信号强度分布热力图
+
+output/site1/F1/wifi_images 为生成的F1的所有Wi-Fi AP信号强度分布热力图的目录
+
+output/site1/F1/ibeacon_images 为生成的F1的所有iBeacon信号强度分布热力图的目录
+
+output/site1/F1/wifi_count.html 为生成的F1的Wi-Fi AP扫描个数分布热力图
 
 ## 数据文件说明（*.txt）
 
@@ -99,9 +108,11 @@ TYPE_WAYPOINT 为真值坐标数据
 
 对于类型为TYPE_ACCELEROMETER、TYPE_ACCELEROMETER、TYPE_GYROSCOPE、TYPE_ROTATION_VECTOR的，第3列至第5列分别为X、Y和Z轴的数据，亦即安卓操作系统回调onSensorChanged()返回的SensorEvent.values[0-2]的内容，第6列为此时的传感器精度，SensorEvent.accuracy。
 对于类型为TYPE_ACCELEROMETER_UNCALIBRATED、TYPE_GYROSCOPE_UNCALIBRATED、TYPE_MAGNETIC_FIELD_UNCALIBRATED的，第3至第8列为安卓操作系统回调onSensorChanged()返回的SensorEvent.values[0-5]的内容，第9列为此时的传感器精度，SensorEvent.accuracy。
+
 参考：https://developer.android.com/guide/topics/sensors
 
 对于类型为TYPE_WIFI的，第3列为ssid，第4列为bssid，第5列为RSSI，第6列为Wi-Fi AP的frequency，第7列为last seen timestamp。
+
 参考：https://developer.android.com/reference/android/net/wifi/ScanResult.html
 
 对于类型为TYPE_BEACON的，实际指的是iBeacon数据。调用安卓接口为ScanRecord.getBytes()。然后根据iBeacon协议做了解析，解析代码：
