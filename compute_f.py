@@ -74,7 +74,7 @@ def correct_positions(rel_positions, reference_positions):
     """
     rel_positions_list = split_ts_seq(rel_positions, reference_positions[:, 0])
     if len(rel_positions_list) != reference_positions.shape[0] - 1:
-        print(f'Rel positions list size: {len(rel_positions_list)}, ref positions size: {reference_positions.shape[0]}')
+        # print(f'Rel positions list size: {len(rel_positions_list)}, ref positions size: {reference_positions.shape[0]}')
         del rel_positions_list[-1]
     assert len(rel_positions_list) == reference_positions.shape[0] - 1
 

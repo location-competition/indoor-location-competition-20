@@ -195,6 +195,7 @@ if __name__ == "__main__":
         save_figure_to_html(fig, html_filename)
 
     # 2. visualize step position, magnetic, wifi, ibeacon
+    print('Visualizing more information...')
     mwi_datas = calibrate_magnetic_wifi_ibeacon_to_position(path_filenames)
 
     step_positions = np.array(list(mwi_datas.keys()))
