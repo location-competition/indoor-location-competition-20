@@ -9,7 +9,7 @@ from compute_f import split_ts_seq, compute_step_positions
 from io_f import read_data_file
 from visualize_f import visualize_trajectory, visualize_heatmap, save_figure_to_html
 
-floor_data_dir = './data/site1/floor1'
+floor_data_dir = './data/site1/F1'
 path_data_dir = floor_data_dir + '/path_data_files'
 floor_plan_filename = floor_data_dir + '/floor_image.png'
 floor_info_filename = floor_data_dir + '/floor_info.json'
