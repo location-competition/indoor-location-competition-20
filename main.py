@@ -9,15 +9,17 @@ from compute_f import split_ts_seq, compute_step_positions
 from io_f import read_data_file
 from visualize_f import visualize_trajectory, visualize_heatmap, save_figure_to_html
 
-path_data_folder = "./data/site1/floor1/path_data_files"
-floor_plan_filename = "./data/site1/floor1/floor_image.png"
-floor_info_filename = "./data/site1/floor1/floor_info.json"
+floor_data_dir = './data/site1/floor1'
+path_data_dir = floor_data_dir + '/path_data_files'
+floor_plan_filename = floor_data_dir + '/floor_image.png'
+floor_info_filename = floor_data_dir + '/floor_info.json'
 
-path_image_save_folder = "./output/site1/floor1/path_images"
-step_position_image_save_folder = "./output/site1/floor1/"
-magn_image_save_folder = "./output/site1/floor1/"
-wifi_image_save_folder = "./output/site1/floor1/wifi_images"
-ibeacon_image_save_folder = "./output/site1/floor1/ibeacon_images"
+save_dir = './output/site1/floor1'
+path_image_save_dir = save_dir + '/path_images'
+step_position_image_save_dir = save_dir
+magn_image_save_dir = save_dir
+wifi_image_save_dir = save_dir + '/wifi_images'
+ibeacon_image_save_dir = save_dir + '/ibeacon_images'
 
 
 def calibrate_magnetic_wifi_ibeacon_to_position(path_file_list):
@@ -168,17 +170,17 @@ def extract_wifi_count(mwi_datas):
 
 
 if __name__ == "__main__":
-    Path(path_image_save_folder).mkdir(parents=True, exist_ok=True)
-    Path(magn_image_save_folder).mkdir(parents=True, exist_ok=True)
-    Path(wifi_image_save_folder).mkdir(parents=True, exist_ok=True)
-    Path(ibeacon_image_save_folder).mkdir(parents=True, exist_ok=True)
+    Path(path_image_save_dir).mkdir(parents=True, exist_ok=True)
+    Path(magn_image_save_dir).mkdir(parents=True, exist_ok=True)
+    Path(wifi_image_save_dir).mkdir(parents=True, exist_ok=True)
+    Path(ibeacon_image_save_dir).mkdir(parents=True, exist_ok=True)
 
     with open(floor_info_filename) as f:
         floor_info = json.load(f)
     width_meter = floor_info["map_info"]["width"]
     height_meter = floor_info["map_info"]["height"]
 
-    path_filenames = list(Path(path_data_folder).resolve().glob("*.txt"))
+    path_filenames = list(Path(path_data_dir).resolve().glob("*.txt"))
 
     # 1. visualize ground truth positions
     print('Visualizing ground truth positions...')
@@ -188,7 +190,7 @@ if __name__ == "__main__":
         path_data = read_data_file(path_filename)
         path_id = path_filename.name.split(".")[0]
         fig = visualize_trajectory(path_data.waypoint[:, 1:3], floor_plan_filename, width_meter, height_meter, title=path_id, show=False)
-        html_filename = f'{path_image_save_folder}/{path_id}.html'
+        html_filename = f'{path_image_save_dir}/{path_id}.html'
         html_filename = str(Path(html_filename).resolve())
         save_figure_to_html(fig, html_filename)
 
@@ -197,7 +199,7 @@ if __name__ == "__main__":
 
     step_positions = np.array(list(mwi_datas.keys()))
     fig = visualize_trajectory(step_positions, floor_plan_filename, width_meter, height_meter, mode='markers', title='Step Position', show=True)
-    html_filename = f'{step_position_image_save_folder}/step_position.html'
+    html_filename = f'{step_position_image_save_dir}/step_position.html'
     html_filename = str(Path(html_filename).resolve())
     save_figure_to_html(fig, html_filename)
 
@@ -205,29 +207,37 @@ if __name__ == "__main__":
     heat_positions = np.array(list(magnetic_strength.keys()))
     heat_values = np.array(list(magnetic_strength.values()))
     fig = visualize_heatmap(heat_positions, heat_values, floor_plan_filename, width_meter, height_meter, colorbar_title='mu tesla', title='Magnetic Strength', show=True)
-    html_filename = f'{magn_image_save_folder}/magnetic_strength.html'
+    html_filename = f'{magn_image_save_dir}/magnetic_strength.html'
     html_filename = str(Path(html_filename).resolve())
     save_figure_to_html(fig, html_filename)
 
     wifi_rssi = extract_wifi_rssi(mwi_datas)
     print(f'This floor has {len(wifi_rssi.keys())} wifi aps')
-    target_wifi = input(f"Please input target wifi ap bssid:\nExample: {list(wifi_rssi.keys())[0:10]}")
+    ten_wifi_bssids = list(wifi_rssi.keys())[0:10]
+    print('Example 10 wifi ap bssids:\n')
+    for bssid in ten_wifi_bssids:
+        print(bssid)
+    target_wifi = input(f"Please input target wifi ap bssid:\n")
     # target_wifi = '1e:74:9c:a7:b2:e4'
     heat_positions = np.array(list(wifi_rssi[target_wifi].keys()))
     heat_values = np.array(list(wifi_rssi[target_wifi].values()))[:, 0]
     fig = visualize_heatmap(heat_positions, heat_values, floor_plan_filename, width_meter, height_meter, colorbar_title='dBm', title=f'Wifi: {target_wifi} RSSI', show=True)
-    html_filename = f'{wifi_image_save_folder}/{target_wifi}.html'
+    html_filename = f'{wifi_image_save_dir}/{target_wifi.replace(":", "-")}.html'
     html_filename = str(Path(html_filename).resolve())
     save_figure_to_html(fig, html_filename)
 
     ibeacon_rssi = extract_ibeacon_rssi(mwi_datas)
     print(f'This floor has {len(ibeacon_rssi.keys())} ibeacons')
-    target_ibeacon = input(f"Please input target ibeacon UUID_MajorID_MinorID:\nExample: {list(ibeacon_rssi.keys())[0:10]}")
+    ten_ibeacon_ummids = list(ibeacon_rssi.keys())[0:10]
+    print('Example 10 ibeacon UUID_MajorID_MinorIDs:\n')
+    for ummid in ten_ibeacon_ummids:
+        print(ummid)
+    target_ibeacon = input(f"Please input target ibeacon UUID_MajorID_MinorID:\n")
     # target_ibeacon = 'FDA50693-A4E2-4FB1-AFCF-C6EB07647825_10073_61418'
     heat_positions = np.array(list(ibeacon_rssi[target_ibeacon].keys()))
     heat_values = np.array(list(ibeacon_rssi[target_ibeacon].values()))[:, 0]
     fig = visualize_heatmap(heat_positions, heat_values, floor_plan_filename, width_meter, height_meter, colorbar_title='dBm', title=f'iBeacon: {target_ibeacon} RSSI', show=True)
-    html_filename = f'{ibeacon_image_save_folder}/{target_ibeacon}.html'
+    html_filename = f'{ibeacon_image_save_dir}/{target_ibeacon}.html'
     html_filename = str(Path(html_filename).resolve())
     save_figure_to_html(fig, html_filename)
 
@@ -239,7 +249,7 @@ if __name__ == "__main__":
     heat_positions = heat_positions[mask]
     heat_values = heat_values[mask]
     fig = visualize_heatmap(heat_positions, heat_values, floor_plan_filename, width_meter, height_meter, colorbar_title='number', title=f'Wifi Count', show=True)
-    html_filename = f'{ibeacon_image_save_folder}/wifi_count.html'
+    html_filename = f'{ibeacon_image_save_dir}/wifi_count.html'
     html_filename = str(Path(html_filename).resolve())
     save_figure_to_html(fig, html_filename)
 
