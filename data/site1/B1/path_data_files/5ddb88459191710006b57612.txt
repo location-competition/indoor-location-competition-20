@@ -1,7 +1,5 @@
 #	startTime:1574668326806
 #	SiteID:5dd3d7732a57a34356595932	SiteName:杭州西溪银泰城	FloorId:5dd3d7732a57a3435659593a	FloorName:B1
-#	User:18721816903	
-#	DeviceId:5d5a12295d11a41d619a18b1	
 #	Brand:OPPO	Model:PBCM10	AndroidName:8.1.0	APILevel:27	
 #	type:1	name:BMI160 Accelerometer	version:2062600	vendor:BOSCH	resolution:0.0023956299	power:0.18	maximumRange:39.22661
 #	type:4	name:BMI160 Gyroscope	version:2062600	vendor:BOSCH	resolution:0.0010681152	power:0.9	maximumRange:34.906586
