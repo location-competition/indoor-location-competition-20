@@ -14,7 +14,7 @@ path_data_dir = floor_data_dir + '/path_data_files'
 floor_plan_filename = floor_data_dir + '/floor_image.png'
 floor_info_filename = floor_data_dir + '/floor_info.json'
 
-save_dir = './output/site1/floor1'
+save_dir = './output/site1/F1'
 path_image_save_dir = save_dir + '/path_images'
 step_position_image_save_dir = save_dir
 magn_image_save_dir = save_dir
