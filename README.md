@@ -1,68 +1,17 @@
-# 文件使用说明
+# Indoor Location Competition 2.0 (Sample Data and Code)
 
-## 运行脚本
+This repository contains sample data and code for [Indoor Location Competition 2.0](https://aka.ms/location20), a continuation of Microsoft Indoor Location Competition. Competition this year will be completely virtual and evaluated on large-scale real indoor location datasets. The dataset to be released consists of dense indoor signatures of WiFi, geomagnetic field, iBeacons etc., as well as ground truth collected from hundreds of buildings in Chinese cities. 
 
-### main.py
+## Sample Data
 
-功能1：
+`data` folder contains indoor traces from two sites. Each trace (`*.txt`) corresponds to an indoor path between position p<sub>1</sub> and p<sub>2</sub> walked by a site-surveyor. During the walk, site-surveyor is holding an Android smartphone flat in front of his body, and a sensor data recording app is running on the device to collect IMU (accelerometer, gyroscope) and geomagnetic field (magnetometer) readings, as well as WiFi and Bluetooth iBeacon scanning results. A detailed description of the format of trace file is shown below. In addition to raw traces, floor plan metadata (e.g., raster image, size, GeoJSON) are also included for each floor. 
 
-1. 提取本楼层所有采集数据文件的真值点，并可视化。
+### Trace File Format（*.txt）
 
-功能2：
-
-1. 根据PDR及真值点，计算出所有的步点位置，并将地磁、wifi、iBeacon数据配准到所有的步点位置上。
-2. 可视化本楼层所有的步点位置。
-3. 可视化本楼层地磁强度分布。
-4. 根据输入的wifi的bssid（命令行提示'Please input target wifi ap bssid:'），可视化该wifi ap的RSSI强度分布。
-5. 根据输入的iBeacon的UUID_MajorID_MinorID（命令行提示'Please input target ibeacon UUID_MajorID_MinorID:'），可视化该iBeacon的RSSI强度分布。
-6. 可视化本楼层不同地点扫到wifi个数的分布情况。
-
-## 其他文件
-
-### compute_f.py：包含数据计算、处理的相关函数
-
-### io_f.py：包含文件读取、数据整理的相关函数
-
-### visualize_f.py：包含数据可视化的相关函数
-
-## data文件夹
-
-包含原始数据并作为默认的数据存储位置
-
-示例：
-
-data/site1 为包含site1场馆所有楼层的所有数据的文件夹
-
-data/site1/F1 为包含F1楼层的所有数据的文件夹
-
-data/site1/F1/path_data_files 为包含F1的所有原始数据文件的文件夹
-
-data/site1/F1/floor_image.png 为F1的楼层地图
-
-data/site1/F1/floor_info.json 为包含F1地图尺寸信息的文件
-
-data/site1/F1/geojson_map.json 为F1的地图的geojson文件
-
-可视化结果保存在output目录下：
-
-output/site1/F1/path_images 为生成的F1的所有path真值轨迹图目录
-
-output/site1/F1/step_position.html 为生成的F1的所有步行位置分布图
-
-output/site1/F1/magnetic_strength.html 为生成的F1的地磁信号强度分布热力图
-
-output/site1/F1/wifi_images 为生成的F1的所有Wi-Fi AP信号强度分布热力图的目录
-
-output/site1/F1/ibeacon_images 为生成的F1的所有iBeacon信号强度分布热力图的目录
-
-output/site1/F1/wifi_count.html 为生成的F1的Wi-Fi AP扫描个数分布热力图
-
-## 数据文件说明（*.txt）
-
-| Unix Timestamp\(ms\) | Data Type                                           | Column3                                  | Column4           | Column4      | Column5          | Column6             | Column7           | Column8           | Column9                                |
+| Time | Data Type                                           | Value                                  |            |       |           |              |            |            |                                 |
 |----------------------|-----------------------------------------------------|------------------------------------------|-------------------|--------------|------------------|---------------------|-------------------|-------------------|----------------------------------------|
 | 1574659531598        | TYPE\_WAYPOINT                                      | 196\.41757                               | 117\.84907        |              |                  |                     |                   |                   |                                        |
-|                      | The position that collector labels on the map       | Coordinate x                             | Coordiante y      |              |                  |                     |                   |                   |                                        |
+|                      | Location surveyor labeled on the map       | Coordinate x (meter)                             | Coordiante y (meter)     |              |                  |                     |                   |                   |                                        |
 |                      |                                                     |                                          |                   |              |                  |                     |                   |                   |                                        |
 | 1574659531695        | TYPE\_ACCELEROMETER                                 | \-1\.7085724                             | \-0\.274765       | 16\.657166   | 2                |                     |                   |                   |                                        |
 |                      | Android Sensor\.TYPE\_ACCELEROMETER                 | X axis                                   | Y axis            | Z axis       | accuracy         |                     |                   |                   |                                        |
@@ -84,43 +33,36 @@ output/site1/F1/wifi_count.html 为生成的F1的Wi-Fi AP扫描个数分布热�
 |                      | Wi\-Fi data                                         | ssid                                     | bssid             | RSSI         | frequency        | last seen timestamp |                   |                   |                                        |
 |                      |                                                     |                                          |                   |              |                  |                     |                   |                   |                                        |
 | 1574659532751        | TYPE\_BEACON                                        | FDA50693\-A4E2\-4FB1\-AFCF\-C6EB07647825 | 10073             | 61418        | \-65             | \-82                | 5\.50634293288929 | 6B:11:4C:D1:29:F2 | 1574659532751                          |
-|                      | iBeacon data                                        | UUID                                     | MajorID           | MinorID      | Tx Power         | RSSI                | distance          | mac address       | same with UNIX timestamp, padding data |
+|                      | iBeacon data                                        | UUID                                     | MajorID           | MinorID      | Tx Power         | RSSI                | Distance          | MAC Address       | same with Unix time, padding data |
 
 
-第一列为Unix时间戳，单位为毫秒
-对于sensor类型的数据，这个时间戳是SensorEvent.timestamp对齐到UNIX时间戳后的数值。
-对于其他类型的数据，这个时间戳是程序运行时UNIX系统时间戳。
+The first column is Unix Time in millisecond. In specific, we use SensorEvent.timestamp for sensor data and system time for WiFi and Bluetooth scans. 
 
-第二列为数据类型
-TYPE_ACCELEROMETER 为加速度计数据
-TYPE_MAGNETIC_FIELD 为磁力计数据
-TYPE_GYROSCOPE 为陀螺仪数据
-TYPE_ROTATION_VECTOR 为旋转矢量数据
-TYPE_MAGNETIC_FIELD_UNCALIBRATED 为未校准磁力计数据
-TYPE_GYROSCOPE_UNCALIBRATED 为未校准陀螺仪数据
-TYPE_ACCELEROMETER_UNCALIBRATED	为未校准加速度计数据
-TYPE_WIFI 为Wi-Fi数据
-TYPE_BEACON 为iBeacon类型数据
-TYPE_WAYPOINT 为真值坐标数据
+The second column is the data type (ten in total).
+* TYPE_ACCELEROMETER
+* TYPE_MAGNETIC_FIELD
+* TYPE_GYROSCOPE
+* TYPE_ROTATION_VECTOR
+* TYPE_MAGNETIC_FIELD_UNCALIBRATED
+* TYPE_GYROSCOPE_UNCALIBRATED
+* TYPE_ACCELEROMETER_UNCALIBRATED
+* TYPE_WIFI
+* TYPE_BEACON
+* TYPE_WAYPOINT: ground truth location labeled by the surveyor
 
-第三列开始为数据内容
-对于类型为TYPE_WAYPOINT的，第3列至第4列分别指X轴、Y轴坐标，单位为米。
+Data values start from the third column. 
 
-对于类型为TYPE_ACCELEROMETER、TYPE_ACCELEROMETER、TYPE_GYROSCOPE、TYPE_ROTATION_VECTOR的，第3列至第5列分别为X、Y和Z轴的数据，亦即安卓操作系统回调onSensorChanged()返回的SensorEvent.values[0-2]的内容，第6列为此时的传感器精度，SensorEvent.accuracy。
-对于类型为TYPE_ACCELEROMETER_UNCALIBRATED、TYPE_GYROSCOPE_UNCALIBRATED、TYPE_MAGNETIC_FIELD_UNCALIBRATED的，第3至第8列为安卓操作系统回调onSensorChanged()返回的SensorEvent.values[0-5]的内容，第9列为此时的传感器精度，SensorEvent.accuracy。
+Column 3-5 of TYPE_ACCELEROMETER、TYPE_ACCELEROMETER、TYPE_GYROSCOPE、TYPE_ROTATION_VECTOR are SensorEvent.values[0-2] from the callback function onSensorChanged(). Column 6 is SensorEvent.accuracy.
 
-参考：https://developer.android.com/guide/topics/sensors
+Column 3-8 of TYPE_ACCELEROMETER_UNCALIBRATED、TYPE_GYROSCOPE_UNCALIBRATED、TYPE_MAGNETIC_FIELD_UNCALIBRATED are SensorEvent.values[0-5] from the callback function onSensorChanged(). Column 9 is SensorEvent.accuracy.
 
-对于类型为TYPE_WIFI的，第3列为ssid，第4列为bssid，第5列为RSSI，第6列为Wi-Fi AP的frequency，第7列为last seen timestamp。
-
-参考：https://developer.android.com/reference/android/net/wifi/ScanResult.html
-
-对于类型为TYPE_BEACON的，实际指的是iBeacon数据。调用安卓接口为ScanRecord.getBytes()。然后根据iBeacon协议做了解析，解析代码：
+Values of TYPE_BEACON are obtained from ScanRecord.getBytes(). The results are decoded based on iBeacon protocol using the code below. 
+```
 val major = ((scanRecord[startByte + 20].toInt() and 0xff) * 0x100 + (scanRecord[startByte + 21].toInt() and 0xff))
 val minor = ((scanRecord[startByte + 22].toInt() and 0xff) * 0x100 + (scanRecord[startByte + 23].toInt() and 0xff))
 val txPower = scanRecord[startByte + 24]
-第3列为UUID，第4列为major ID，第5列为minor ID，第6列为接收到的功率，第7列为RSSI，第8列为distance，第9列为mac，第10列与第1列系统时间戳相同，没有实际意义。
-distance的计算公式为：
+```
+Distance in column 8 is calculated as 
 ```
 private static double calculateDistance(int txPower, double rssi) {
   if (rssi == 0) {
@@ -136,4 +78,61 @@ private static double calculateDistance(int txPower, double rssi) {
   }
 }
 ```
-参考：https://developer.android.com/reference/android/bluetooth/le/ScanRecord
+
+### References:  
+https://developer.android.com/guide/topics/sensors  
+https://developer.android.com/reference/android/net/wifi/ScanResult.html  
+https://developer.android.com/reference/android/bluetooth/le/ScanRecord
+
+
+
+## Sample Code
+
+Along with sample data from two sites, this repo also provides several scripts on parsing and analyzing indoor traces. All scripts are tested with Python 3.6.9 on both Windows 10 and Mac OS 15. 
+
+### How to run the code
+`python main.py`
+
+#### Main functions
+
+| Functions                                     | Output                                      |
+|-----------------------------------------------|---------------------------------------------|
+| Ground truth location visualization           | output/site1/F1/path_images                 |
+| Sample step detection and visualization       | output/site1/F1/step_position.html          |
+| Geo-magnetic field intensity visualization    | output/site1/F1/magnetic_strength.html      |
+| WiFi RSSI heatmap generation                  | output/site1/F1/wifi_images                 |
+| iBeacon RSSI heatmap generation               | output/site1/F1/ibeacon_images              |
+| WiFi SSID counts visualization                | output/site1/F1/wifi_count.html             |
+
+
+## Contents
+```
+indoor-location-competition-20
+│   README.md
+│   main.py                                                      //main function of the sample code
+|   compute_f.py                                                 //data processing functions
+|   io_f.py                                                      //data preprocessing functions
+|   visualize_f.py                                               //visualization function
+│
+└───data                                                         //raw data from two sites
+      └───site1
+      |     └───B1                                               //traces from one floor
+      |     |    └───path_data_files                             
+      |     |    |          └───5dda14a2c5b77e0006b17533.txt     //trace file
+      |     |    |          |   ...
+      |     |    |
+      |     |    |   floor_image.png                             //raster floor plan
+      |     |    |   floor_info.json                             //floor size info
+      |     |    |   geojson_map.json                            //floor plan in vector format (GeoJSON)
+      |     |
+      |     └───F1
+      |     │   ...
+      |
+      └───site2
+            │   ...
+```
+
+
+## License
+
+This repository is licensed with the [MIT license](./LICENSE).
