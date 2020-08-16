@@ -2,6 +2,9 @@
 
 This repository contains sample data and code for [Indoor Location Competition 2.0](https://aka.ms/location20), a continuation of Microsoft Indoor Location Competition. Competition this year will be completely virtual and evaluated on large-scale real indoor location datasets. The dataset to be released consists of dense indoor signatures of WiFi, geomagnetic field, iBeacons etc., as well as ground truth collected from hundreds of buildings in Chinese cities. 
 
+## Webinar Video
+We held a webinar in July, the video is [here](https://www.youtube.com/watch?v=xt3OzMC-XMU).
+
 ## Sample Data
 
 `data` folder contains indoor traces from two sites. Each trace (`*.txt`) corresponds to an indoor path between position p<sub>1</sub> and p<sub>2</sub> walked by a site-surveyor. During the walk, site-surveyor is holding an Android smartphone flat in front of his body, and a sensor data recording app is running on the device to collect IMU (accelerometer, gyroscope) and geomagnetic field (magnetometer) readings, as well as WiFi and Bluetooth iBeacon scanning results. A detailed description of the format of trace file is shown below. In addition to raw traces, floor plan metadata (e.g., raster image, size, GeoJSON) are also included for each floor. 
