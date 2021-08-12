@@ -1,3 +1,7 @@
+**:point_right: To download the full dataset, please visit [Indoor Location Competition 2.0 Dataset](https://aka.ms/location20dataset).**
+
+**:point_right: For more details on the competition including winning solutions, please visit our [Kaggle competition site](https://www.kaggle.com/c/indoor-location-navigation).**
+
 # Indoor Location Competition 2.0 (Sample Data and Code)
 
 This repository contains sample data and code for [Indoor Location Competition 2.0](https://aka.ms/location20), a continuation of Microsoft Indoor Location Competition. Competition this year will be completely virtual and evaluated on large-scale real indoor location datasets. The dataset to be released consists of dense indoor signatures of WiFi, geomagnetic field, iBeacons etc., as well as ground truth collected from hundreds of buildings in Chinese cities. 
