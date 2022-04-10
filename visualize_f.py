@@ -6,7 +6,7 @@ def save_figure_to_html(fig, filename):
     fig.write_html(filename)
 
 
-def visualize_trajectory(trajectory, floor_plan_filename, width_meter, height_meter, title=None, mode='lines + markers + text', show=False):
+def visualize_trajectory(trajectory, floor_plan_filename, width_meter, height_meter, title=None, mode='lines + markers + text', show=False, plot_width=900):
     fig = go.Figure()
 
     # add trajectory
@@ -68,8 +68,8 @@ def visualize_trajectory(trajectory, floor_plan_filename, width_meter, height_me
             x=0,
         ),
         autosize=True,
-        width=900,
-        height=200 + 900 * height_meter / width_meter,
+        width=plot_width,
+        height=200 + plot_width * height_meter / width_meter,
         template="plotly_white",
     )
 
