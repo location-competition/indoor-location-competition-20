@@ -7,3 +7,7 @@
 
 .DS_Store
 */.DS_Store
+
+data_full
+.ipynb_checkpoints/
+
